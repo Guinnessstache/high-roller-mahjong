@@ -892,7 +892,13 @@ $('cam-cycle').addEventListener('click', () => {
 });
 
 // Menu
-$('menu-btn').addEventListener('click', () => $('menu').classList.toggle('hidden'));
+$('menu-btn').addEventListener('click', (e) => { e.stopPropagation(); $('menu').classList.toggle('hidden'); });
+$('menu-close').addEventListener('click', () => $('menu').classList.add('hidden'));
+// Tap or click anywhere outside the settings panel to close it.
+document.addEventListener('pointerdown', (e) => {
+  const m = $('menu');
+  if (!m.classList.contains('hidden') && !m.contains(e.target) && !$('menu-btn').contains(e.target)) m.classList.add('hidden');
+});
 $('quality-select').value = quality;
 $('quality-select').addEventListener('change', (e) => { local.set('hr_quality', e.target.value); world.setQuality(e.target.value); });
 // Realistic players: on by default except on phones / Low graphics (they're ~7 MB and heavier to draw).
