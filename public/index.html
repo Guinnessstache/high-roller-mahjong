@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>High Roller Mahjong</title>
+  <meta name="description" content="3D multiplayer Hong Kong Mahjong in a Macau casino. Invite friends with a table code." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🀄</text></svg>" />
+  <!-- Self-hosted fonts (OFL) so the desktop/Steam build works offline -->
+  <link rel="stylesheet" href="/vendor/fontsource/cinzel/600.css" />
+  <link rel="stylesheet" href="/vendor/fontsource/cinzel/800.css" />
+  <link rel="stylesheet" href="/vendor/fontsource/inter/400.css" />
+  <link rel="stylesheet" href="/vendor/fontsource/inter/500.css" />
+  <link rel="stylesheet" href="/vendor/fontsource/inter/600.css" />
+  <link rel="stylesheet" href="/vendor/fontsource/inter/700.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "/vendor/three/build/three.module.js",
+        "three/addons/": "/vendor/three/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="scene"></div>
+
+  <!-- Loading -->
+  <div id="loading"><div class="spinner">🀄</div><div>Shuffling the tiles…</div></div>
+
+  <!-- Lobby -->
+  <section id="lobby" class="hidden">
+    <div class="lobby-inner">
+      <h1 class="logo"><span class="suit red">中</span> High Roller <span class="suit green">發</span><small>Hong Kong Mahjong</small></h1>
+      <label class="field name-field">
+        <span>Your name at the table</span>
+        <input id="name-input" maxlength="16" autocomplete="nickname" placeholder="e.g. Lucky Lou" />
+      </label>
+      <div class="lobby-cards">
+        <div class="panel">
+          <h2>Host a table</h2>
+          <div class="grid2">
+            <label class="field"><span>Game length</span>
+              <select id="set-rounds">
+                <option value="1" selected>East round</option>
+                <option value="2">East + South</option>
+                <option value="4">Full game</option>
+              </select>
+            </label>
+            <label class="field"><span>Minimum to win</span>
+              <select id="set-minfaan">
+                <option value="0">0 faan (chicken hands)</option>
+                <option value="1">1 faan (casual)</option>
+                <option value="3" selected>3 faan (standard)</option>
+              </select>
+            </label>
+            <label class="field"><span>Starting points</span>
+              <select id="set-points">
+                <option value="2000">2,000</option>
+                <option value="5000" selected>5,000</option>
+                <option value="10000">10,000</option>
+              </select>
+            </label>
+            <label class="field"><span>Turn timer</span>
+              <select id="set-timer">
+                <option value="12">12 sec</option>
+                <option value="20" selected>20 sec</option>
+                <option value="30">30 sec</option>
+                <option value="45">45 sec</option>
+              </select>
+            </label>
+          </div>
+          <details class="house-rules">
+            <summary>House rules</summary>
+            <div class="grid2">
+              <label class="field"><span>Points per base unit</span>
+                <select id="set-unit"><option value="1">1</option><option value="5">5</option><option value="10" selected>10</option><option value="50">50</option></select>
+              </label>
+              <label class="field"><span>Limit (max faan)</span>
+                <select id="set-maxfaan"><option value="8">8</option><option value="10" selected>10</option><option value="13">13</option></select>
+              </label>
+              <label class="field"><span>Flowers &amp; seasons</span>
+                <select id="set-bonus"><option value="1" selected>In play (144 tiles)</option><option value="0">Removed (136 tiles)</option></select>
+              </label>
+              <label class="field"><span>Seven Pairs</span>
+                <select id="set-sevenpairs"><option value="0" selected>Not allowed</option><option value="1">Allowed (4 faan)</option></select>
+              </label>
+            </div>
+          </details>
+          <label class="chk list-row hidden" id="list-row"><input type="checkbox" id="set-listed" /> List publicly <span class="hint-inline">— anyone can find it in Browse tables</span></label>
+          <button id="create-btn" class="btn gold big">Create table</button>
+          <div class="solo-row">
+            <button id="solo-btn" class="btn ghost big" type="button">Play vs bots</button>
+            <select id="solo-level" aria-label="Bot difficulty">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Join friends</h2>
+          <label class="field"><span>Table code</span>
+            <input id="code-input" class="code-input" maxlength="5" placeholder="ABCDE" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+          </label>
+          <button id="join-btn" class="btn green big">Join table</button>
+          <button id="browse-btn" class="btn ghost big hidden" type="button">Browse open tables</button>
+          <p class="hint">Got an invite link? It fills the code in for you.</p>
+          <button id="lobby-rules-btn" class="btn ghost big" type="button">How to play &amp; scoring</button>
+        </div>
+      </div>
+      <div id="server-status" class="server-status connecting" role="status" aria-live="polite"><span class="dot"></span><span class="ss-text">Connecting to the game server…</span></div>
+      <p id="lobby-error" class="error"></p>
+      <p class="lobby-foot"><button id="lobby-ach-btn" class="btn small ghost" type="button">🏆 Achievements</button> <button id="lobby-log-btn" class="btn small ghost hidden" type="button">Open log file</button> <button id="lobby-quit-btn" class="btn small ghost hidden" type="button">Quit game</button></p>
+    </div>
+  </section>
+
+  <!-- In-game HUD -->
+  <section id="hud" class="hidden">
+    <div class="top-left">
+      <div class="room-badge" title="Share this code with friends">
+        <span class="lbl">Table</span><span id="room-code">-----</span>
+        <button id="copy-link" class="btn small">Copy<span class="lbl-long"> invite</span></button>
+        <button id="steam-invite" class="btn small gold hidden" title="Invite Steam friends">Invite<span class="lbl-long"> Steam friends</span></button>
+        <button id="players-btn" class="btn small" title="Players at this table: mute, hide camera, remove">Players</button>
+      </div>
+      <div id="status-line" class="status-line"></div>
+      <div id="host-controls" class="host-controls hidden">
+        <button id="start-btn" class="btn gold">Start game</button>
+        <button id="pause-btn" class="btn small ghost hidden">Pause<span class="lbl-long"> after hand</span></button>
+        <button id="table-rules-btn" class="btn small ghost">Rules…</button>
+        <button id="bots-btn" class="btn small ghost">Bots…</button>
+      </div>
+    </div>
+
+    <div class="top-right">
+      <div class="seg" id="cam-seg">
+        <button data-cam="seat" class="active" title="Seated view (V)">Seat</button>
+        <button data-cam="overhead" title="Overhead view (V)">Overhead</button>
+        <button data-cam="orbit" title="Free camera (V) — drag to orbit">Free</button>
+      </div>
+      <button id="cam-cycle" class="btn small ghost icon cam-cycle" title="Change camera view (V)">👁</button>
+      <button id="menu-btn" class="btn small ghost icon" title="Settings">⚙</button>
+      <div id="menu" class="menu hidden">
+        <label>Graphics
+          <select id="quality-select"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>
+        </label>
+        <label>Interface size
+          <select id="uiscale-select"><option value="1">100%</option><option value="1.15">115%</option><option value="1.3">130%</option><option value="1.5">150%</option></select>
+        </label>
+        <label class="chk"><input type="checkbox" id="people-toggle" checked /> Realistic players</label>
+        <label class="chk"><input type="checkbox" id="sfx-toggle" checked /> Sound effects</label>
+        <label class="chk"><input type="checkbox" id="amb-toggle" checked /> Casino ambience</label>
+        <label class="chk"><input type="checkbox" id="corners-toggle" checked /> Numbers on tile corners</label>
+        <label class="chk"><input type="checkbox" id="hints-toggle" checked /> Ready hints (what you&rsquo;re waiting on)</label>
+        <label class="chk"><input type="checkbox" id="quick-toggle" /> One-tap discard</label>
+        <button id="help-btn" class="btn small ghost">How to play &amp; scoring</button>
+        <label class="chk"><input type="checkbox" id="tiles-toggle" /> Show video tiles</label>
+        <button id="devices-btn" class="btn small ghost">Camera &amp; mic…</button>
+        <button id="fullscreen-btn" class="btn small ghost">Fullscreen</button>
+        <button id="stand-btn" class="btn small ghost">Stand up</button>
+        <button id="ach-btn" class="btn small ghost">Achievements</button>
+        <button id="log-btn" class="btn small ghost hidden">Open log file</button>
+        <button id="leave-btn" class="btn small red">Leave table</button>
+        <button id="quit-btn" class="btn small ghost hidden">Quit game</button>
+        <div class="fps" id="fps"></div>
+      </div>
+    </div>
+
+    <div id="pad-hints" class="pad-hints" aria-hidden="true"></div>
+    <div id="banner" class="banner"><div class="b-title"></div><div class="b-sub"></div></div>
+    <div id="toast" class="toast"></div>
+    <div id="ach-pop" class="ach-pop" role="status" aria-live="polite"><img class="ap-icon" alt="" /><div><div class="ap-label">Achievement unlocked</div><div class="ap-name"></div><div class="ap-desc"></div></div></div>
+    <div id="tiles" class="tiles hidden"></div>
+
+    <div class="bottom-left">
+      <div class="chat">
+        <div id="chat-log" class="chat-log"></div>
+        <form id="chat-form" class="chat-form">
+          <input id="chat-input" maxlength="240" placeholder="Say something… (Enter)" autocomplete="off" />
+        </form>
+        <div class="reactions">
+          <button data-emoji="👍">👍</button><button data-emoji="😂">😂</button><button data-emoji="😱">😱</button>
+          <button data-emoji="🔥">🔥</button><button data-emoji="🤔">🤔</button><button data-emoji="🀄">🀄</button><button data-emoji="🍀">🍀</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-right">
+      <div class="media-panel">
+        <div class="self-wrap hidden" id="self-wrap"><video id="self-video" muted playsinline autoplay></video><div id="self-level" class="self-level"></div></div>
+        <button id="media-start" class="btn gold" title="Join with camera &amp; mic">🎥<span class="lbl-long"> Join with camera &amp; mic</span></button>
+        <div id="media-controls" class="media-controls hidden">
+          <button id="mic-btn" class="btn small" title="Mute / unmute">🎙<span class="lbl-long"> Mute</span></button>
+          <button id="cam-btn" class="btn small" title="Camera on / off">📷<span class="lbl-long"> Camera off</span></button>
+          <button id="media-devices" class="btn small ghost" title="Choose camera, microphone and speakers">⚙</button>
+          <button id="media-stop" class="btn small ghost" title="Stop camera &amp; mic">✕<span class="lbl-long"> Stop</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div id="table-info" class="table-info hidden"></div>
+
+    <div id="results" class="results hidden" aria-live="polite">
+      <div class="r-title"></div>
+      <div class="r-sub"></div>
+      <div class="r-hand"></div>
+      <div class="r-faan"></div>
+      <div class="r-pay"></div>
+      <div class="r-foot"></div>
+    </div>
+
+    <div class="bottom-center">
+      <div id="turn-timer" class="turn-timer hidden" aria-live="off"><span class="tt-name"></span><span class="tt-secs"></span><div class="tt-bar"><div></div></div></div>
+      <div id="action-bar" class="action-bar hidden">
+        <div id="claim-tile" class="claim-tile"></div>
+        <div id="action-btns" class="btn-row"></div>
+      </div>
+      <div id="my-info" class="my-info">
+        <span id="my-wind" class="my-wind"></span>
+        <span id="my-stack" class="my-stack"></span>
+        <span id="my-hint" class="my-hint"></span>
+        <button id="sitout-btn" class="btn small ghost">Sit out</button>
+      </div>
+      <div id="hand-bar" class="hand-bar hidden">
+        <div id="my-bonus" class="my-bonus"></div>
+        <div id="my-hand" class="my-hand" role="listbox" aria-label="Your tiles"></div>
+        <div id="my-melds" class="my-melds"></div>
+      </div>
+    </div>
+  </section>
+
+  <dialog id="steam-help">
+    <form method="dialog">
+      <h3>Invite Steam friends</h3>
+      <p>Couldn&rsquo;t read your Steam friends list right now. Friends can still get in:</p>
+      <ul class="sh-list">
+        <li><b>With the table code:</b> they open the game, click <em>Join table</em> and enter it.</li>
+        <li><b>From Steam:</b> they right-click you in their Friends list &rarr; <em>Join Game</em> (while they have the game open).</li>
+      </ul>
+      <code class="sh-link"></code>
+      <div class="dlg-btns"><button type="button" id="steam-help-copy" class="btn small">Copy invite</button><button value="ok" class="btn gold small">Got it</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="steam-friends">
+    <form method="dialog">
+      <h3>Invite Steam friends</h3>
+      <input id="sf-search" class="sf-search" placeholder="Search friends…" autocomplete="off" />
+      <div id="sf-list" class="sf-list"></div>
+      <p class="hint">Invites arrive in the friend&rsquo;s Steam chat. They click <em>Accept</em> (with the game installed) and land at this table. Or share the table code &mdash; they enter it under <em>Join table</em>.</p>
+      <div class="dlg-btns"><button type="button" id="sf-copy" class="btn small">Copy table code</button><button value="ok" class="btn gold small">Done</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="bots-dialog">
+    <form method="dialog">
+      <h3>Computer players</h3>
+      <div class="bd-section">
+        <div class="bd-label">Add a bot</div>
+        <div class="bd-row">
+          <select id="bot-add-level"><option value="easy">Easy — grabs every claim, ignores faan</option><option value="medium" selected>Medium — efficient, plans for faan</option><option value="hard">Hard — counts tiles, defends late</option></select>
+          <button type="button" id="bot-add" class="btn gold small">Add</button>
+        </div>
+      </div>
+      <div class="bd-section">
+        <div class="bd-label">At the table</div>
+        <div id="bot-list" class="bot-list"></div>
+      </div>
+      <div class="bd-section">
+        <div class="bd-label">Keep the table full</div>
+        <div class="bd-row">
+          <select id="bot-fill">
+            <option value="0">Off</option><option value="4">Always 4 players</option>
+          </select>
+          <select id="bot-fill-level"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select>
+        </div>
+        <p class="hint">Mahjong needs four. Bots fill empty seats and hand their seat (and points) to friends who join between hands.</p>
+      </div>
+      <div class="dlg-btns"><button value="ok" class="btn gold small">Done</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="ach-dialog">
+    <form method="dialog">
+      <h3>Achievements</h3>
+      <p id="ach-summary" class="hint"></p>
+      <div id="ach-list" class="ach-list"></div>
+      <div class="dlg-btns"><button value="ok" class="btn gold small">Close</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="browse-dialog">
+    <form method="dialog">
+      <h3>Open tables</h3>
+      <p id="browse-status" class="hint"></p>
+      <div id="browse-list" class="browse-list"></div>
+      <div class="dlg-btns"><button type="button" id="browse-refresh" class="btn small">Refresh</button><button value="ok" class="btn gold small">Close</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="players-dialog">
+    <form method="dialog">
+      <h3>Players</h3>
+      <p class="hint">Mute or hide someone just for you. The host can remove players.</p>
+      <label class="chk hidden" id="listed-row"><input type="checkbox" id="listed-toggle" /> List this table in Browse tables</label>
+      <div id="players-list" class="players-list"></div>
+      <div class="dlg-btns"><button value="ok" class="btn gold small">Done</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="devices-dialog">
+    <form method="dialog" class="devices-form">
+      <h3>Camera &amp; mic</h3>
+      <div class="dev-preview"><video id="dev-video" muted playsinline autoplay></video><div id="dev-novideo" class="dev-novideo hidden">No camera</div></div>
+      <label>Camera<select id="dev-video-select"></select></label>
+      <label>Microphone<select id="dev-audio-select"></select></label>
+      <div class="dev-meter" title="Microphone level"><div id="dev-level"></div></div>
+      <label id="dev-output-row">Speakers<select id="dev-output-select"></select></label>
+      <p id="dev-note" class="hint"></p>
+      <div class="dlg-btns"><button type="button" id="dev-test" class="btn ghost small">Test speakers</button><button value="close" class="btn gold small" data-pad-default>Done</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="quit-dialog">
+    <form method="dialog">
+      <h3>Quit High Roller Mahjong?</h3>
+      <p id="quit-note" class="hint"></p>
+      <div class="dlg-btns"><button value="cancel" class="btn ghost small" data-pad-default>Keep playing</button><button value="quit" class="btn red small">Quit</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="rules-dialog">
+    <form method="dialog">
+      <h3>Table rules</h3>
+      <p class="hint">Changes apply from the next game.</p>
+      <div class="grid2">
+        <label class="field"><span>Minimum to win</span><select id="r-minfaan"><option value="0">0 faan</option><option value="1">1 faan</option><option value="2">2 faan</option><option value="3">3 faan</option></select></label>
+        <label class="field"><span>Limit (max faan)</span><select id="r-maxfaan"><option value="8">8</option><option value="10">10</option><option value="13">13</option></select></label>
+        <label class="field"><span>Game length</span><select id="r-rounds"><option value="1">East round</option><option value="2">East + South</option><option value="4">Full game</option></select></label>
+        <label class="field"><span>Points per base unit</span><select id="r-unit"><option value="1">1</option><option value="5">5</option><option value="10">10</option><option value="50">50</option></select></label>
+        <label class="field"><span>Flowers &amp; seasons</span><select id="r-bonus"><option value="1">In play</option><option value="0">Removed</option></select></label>
+        <label class="field"><span>Seven Pairs</span><select id="r-sevenpairs"><option value="0">Not allowed</option><option value="1">Allowed</option></select></label>
+        <label class="field"><span>Turn timer</span><select id="r-timer"><option value="12">12 sec</option><option value="20">20 sec</option><option value="30">30 sec</option><option value="45">45 sec</option></select></label>
+        <label class="field"><span>Claim window</span><select id="r-claim"><option value="5">5 sec</option><option value="8">8 sec</option><option value="12">12 sec</option></select></label>
+      </div>
+      <div class="dlg-btns"><button value="cancel" class="btn ghost small">Cancel</button><button value="ok" class="btn gold small">Apply</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="help-dialog">
+    <form method="dialog">
+      <h3>How to play Hong Kong Mahjong</h3>
+      <div class="help-body">
+        <p><b>Goal:</b> be first to make a complete hand of <b>14 tiles</b>: four <b>sets</b> plus one <b>pair</b>. A set is a <b>pung</b> (three alike), a <b>kong</b> (four alike) or a <b>chow</b> (three in a row in one suit).</p>
+        <p><b>Your turn:</b> you draw a tile, then tap a tile to discard. When someone discards, you can <b>claim</b> it: <b>Pung</b> or <b>Kong</b> from anyone, <b>Chow</b> only from the player on your left, or <b>Mahjong</b> if it completes your hand. A claimed set is laid face up.</p>
+        <p><b>Flowers &amp; seasons</b> are set aside as they arrive and replaced. Your own flower and season (matching your seat wind) score a bonus.</p>
+        <p><b>Faan</b> are points for how special your hand is. You need the table minimum to win. The bigger the faan, the more you collect: the player who discarded your winning tile pays it all; if you draw it yourself, everyone pays half.</p>
+        <div id="faan-table" class="faan-table"></div>
+        <p class="hint">Tip: with Ready hints on, tiles that would leave you one tile from winning get a gold dot, and the bar shows what you&rsquo;re waiting on.</p>
+      </div>
+      <div class="dlg-btns"><button value="ok" class="btn gold small">Got it</button></div>
+    </form>
+  </dialog>
+
+  <script>
+    // If the game fails to start, say so on the loading screen instead of spinning forever.
+    (function () {
+      function fail(msg) {
+        var el = document.getElementById('loading');
+        if (!el || el.classList.contains('fade') || el.dataset.failed) return;
+        el.dataset.failed = '1';
+        el.innerHTML = '<div class="spinner">\ud83c\udc04</div><div>Something went wrong starting the game.</div>' +
+          '<pre style="max-width:80vw;white-space:pre-wrap;color:#ff9a9a;font-size:12px;text-align:left"></pre>';
+        el.querySelector('pre').textContent = msg;
+      }
+      addEventListener('error', function (e) {
+        var t = e.target && e.target !== window ? (e.target.src || e.target.href || '') : '';
+        fail((e.message || 'Failed to load') + (t ? ' — ' + t : '') + (e.filename ? ' — ' + e.filename + ':' + e.lineno : ''));
+      }, true);
+      addEventListener('unhandledrejection', function (e) { fail(String(e.reason && e.reason.stack || e.reason)); });
+      setTimeout(function () { fail('Still loading after 30 seconds. Try restarting the game.'); }, 30000);
+    })();
+  </script>
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

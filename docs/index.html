@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>High Roller Mahjong — 3D multiplayer Hong Kong Mahjong</title>
+  <meta name="description" content="3D multiplayer Hong Kong Mahjong in a Macau casino. Share a 5-letter code, sit down with friends or bots, and play face to face with built-in webcam and mic." />
+  <meta name="theme-color" content="#0b0604" />
+  <meta property="og:title" content="High Roller Mahjong" />
+  <meta property="og:description" content="3D multiplayer Hong Kong Mahjong in a Macau casino — with webcam and mic at the table." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://guinnessstache.github.io/high-roller-mahjong/img/social.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🀄</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/site.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <header class="nav" id="nav">
+    <a class="brand" href="#top"><span class="suit">中</span> High Roller</a>
+    <nav class="links">
+      <a href="#features">Features</a>
+      <a href="#gallery">Screenshots</a>
+      <a href="#how">How it works</a>
+      <a href="#start">Get started</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-gold btn-sm" href="https://github.com/Guinnessstache/high-roller-mahjong">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </header>
+
+  <main id="top">
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+      <div id="hero-canvas" class="hero-canvas" aria-hidden="true"></div>
+      <div class="hero-shade"></div>
+      <div class="hero-content">
+        <p class="eyebrow"><span class="dot"></span> Hong Kong rules · Friends or bots · Coming to Steam</p>
+        <h1 class="title">High Roller <span class="nowrap">Mahjong</span></h1>
+        <p class="lede">3D multiplayer Hong Kong Mahjong in a Macau casino. Share a five-letter code, pull up a chair, and play your friends face to face &mdash; webcam and mic built right into the table, with bots to fill any empty seat.</p>
+        <div class="cta">
+          <a class="btn btn-gold" href="#start">Get started</a>
+          <a class="btn btn-ghost" href="https://github.com/Guinnessstache/high-roller-mahjong">View source</a>
+        </div>
+        <div class="hand-toast" id="hand-toast" aria-live="polite"></div>
+      </div>
+      <a class="scroll-hint" href="#features" aria-label="Scroll to features"><span></span></a>
+    </section>
+
+    <!-- ================= STATS ================= -->
+    <section class="stats">
+      <div class="stat"><b>4</b><span>seats per table &mdash; bots fill the gaps</span></div>
+      <div class="stat"><b>144</b><span>tiles, every face drawn in code</span></div>
+      <div class="stat"><b>20+</b><span>scoring patterns, from All Chows to Thirteen Orphans</span></div>
+      <div class="stat"><b>0</b><span>servers to pay for &mdash; the host&rsquo;s PC runs the table</span></div>
+    </section>
+
+    <!-- ================= FEATURES ================= -->
+    <section class="section" id="features">
+      <p class="kicker">What's at the table</p>
+      <h2>A night in Macau, <em>without leaving the couch</em></h2>
+      <div class="features">
+        <div class="feature"><div class="icon">🏮</div><h3>A real casino around you</h3><p>Red lanterns, neon, slot banks, roulette and a bar surround a rosewood mahjong table with brass corners and emerald felt.</p></div>
+        <div class="feature"><div class="icon">🎥</div><h3>Faces at the table</h3><p>Peer-to-peer webcam and mic. Each player's video floats over their seat, and the frame glows green when they talk.</p></div>
+        <div class="feature"><div class="icon">🔑</div><h3>Join with a code</h3><p>The host gets a code like <code>K7QXP</code>. Friends type it in or click the invite &mdash; on Steam it opens straight into the table.</p></div>
+        <div class="feature"><div class="icon">🀄</div><h3>Proper Hong Kong rules</h3><p>Pung, kong, chow and win claims with the right priority, robbing the kong, flowers and seasons, dealer rotation and wind rounds &mdash; all enforced by the host, so hands never leak.</p></div>
+        <div class="feature"><div class="icon">📜</div><h3>Faan scoring, explained</h3><p>Every win shows its hand and a faan breakdown. A built-in scoring guide, and ready hints that light up the tiles you could discard to be one away.</p></div>
+        <div class="feature"><div class="icon">🤖</div><h3>Bots that play properly</h3><p>Easy, Medium and Hard. They count tiles, plan for the faan minimum, and Hard bots play defense late in the hand.</p></div>
+        <div class="feature"><div class="icon">🀇</div><h3>Tiles you can feel</h3><p>Every tile is one physical piece: watch it leave the wall, land in a hand, clack into the discards or get claimed into a meld.</p></div>
+        <div class="feature"><div class="icon">🎮</div><h3>Play your way</h3><p>Mouse, touch, keyboard (<kbd>&larr;</kbd><kbd>&rarr;</kbd> pick, <kbd>Enter</kbd> discard, <kbd>P</kbd> pung) or a controller on Steam Deck.</p></div>
+      </div>
+    </section>
+
+    <!-- ================= GALLERY ================= -->
+    <section class="section" id="gallery">
+      <p class="kicker">Screenshots</p>
+      <h2>Take a seat</h2>
+      <figure class="gallery-main">
+        <img id="gallery-img" src="img/seat.jpg" alt="Seated view of the mahjong table mid-hand" width="1600" height="900" />
+        <figcaption id="gallery-cap">Seated view &mdash; your tiles on the rack, the wall and everyone&rsquo;s discards on the felt.</figcaption>
+      </figure>
+      <div class="thumbs" role="tablist">
+        <button class="thumb active" data-src="img/seat.jpg" data-cap="Seated view &mdash; your tiles on the rack, the wall and everyone&rsquo;s discards on the felt."><img src="img/seat-thumb.jpg" alt="Seated view" width="480" height="270" /></button>
+        <button class="thumb" data-src="img/claim.jpg" data-cap="Someone discards a tile you can use: claim it with one tap."><img src="img/claim-thumb.jpg" alt="Claiming a discard" width="480" height="270" /></button>
+        <button class="thumb" data-src="img/overhead.jpg" data-cap="Overhead view &mdash; the wall, the melds and the discard pinwheel."><img src="img/overhead-thumb.jpg" alt="Overhead view" width="480" height="270" /></button>
+      </div>
+    </section>
+
+    <!-- ================= HOW IT WORKS ================= -->
+    <section class="section" id="how">
+      <p class="kicker">How it works</p>
+      <h2>Three steps to the first hand</h2>
+      <ol class="steps">
+        <li>
+          <span class="num">1</span>
+          <h3>Host a table</h3>
+          <p>Pick the game length, the minimum faan to win and a turn timer. Bots fill any empty seats.</p>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <h3>Share the code</h3>
+          <div class="code-chip" aria-label="Example table code"><span>K</span><span>7</span><span>Q</span><span>X</span><span>P</span></div>
+          <p>Friends enter it in the lobby or open the invite link.</p>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <h3>Wash the tiles</h3>
+          <p>Turn on your camera, hit <strong>Start game</strong>, and let the tiles clack.</p>
+        </li>
+      </ol>
+
+      <div class="arch">
+        <div class="arch-text">
+          <h3>Under the hood</h3>
+          <p>One small Node.js process runs everything that has to be trusted: the wall, the claim rules and the faan scoring. Browsers only ever receive what they're allowed to see. Video and audio skip the server entirely and flow directly between players over WebRTC.</p>
+          <ul class="tech">
+            <li>Three.js</li><li>Socket.IO</li><li>WebRTC</li><li>Express</li><li>Web Audio</li><li>node:test</li>
+          </ul>
+        </div>
+        <svg class="arch-svg" viewBox="0 0 560 300" role="img" aria-labelledby="arch-title">
+          <title id="arch-title">Architecture: browsers talk to a Node game server over Socket.IO for game state, and to each other over WebRTC for video and audio.</title>
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e8c060" /></marker>
+            <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5ee08a" /></marker>
+          </defs>
+          <rect x="190" y="18" width="180" height="82" rx="12" class="box srv" />
+          <text x="280" y="50" class="t1">Game server</text>
+          <text x="280" y="72" class="t2">rules · deck · pots · timers</text>
+          <text x="280" y="88" class="t2">WebRTC signaling</text>
+          <rect x="20" y="196" width="150" height="76" rx="12" class="box" />
+          <text x="95" y="228" class="t1">Browser A</text>
+          <text x="95" y="250" class="t2">3D table · camera</text>
+          <rect x="390" y="196" width="150" height="76" rx="12" class="box" />
+          <text x="465" y="228" class="t1">Browser B</text>
+          <text x="465" y="250" class="t2">3D table · camera</text>
+          <path d="M120 194 L230 104" class="ln" marker-start="url(#ah)" marker-end="url(#ah)" />
+          <path d="M440 194 L330 104" class="ln" marker-start="url(#ah)" marker-end="url(#ah)" />
+          <text x="140" y="140" class="t3">actions / state</text>
+          <text x="420" y="140" class="t3">actions / state</text>
+          <path d="M174 238 L386 238" class="ln green" marker-start="url(#ahg)" marker-end="url(#ahg)" />
+          <text x="280" y="228" class="t3 g">video + voice (peer-to-peer)</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ================= GET STARTED ================= -->
+    <section class="section" id="start">
+      <p class="kicker">Get started</p>
+      <h2>Take your seat</h2>
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="local" role="tab">Run on your PC</button>
+        <button class="tab" data-tab="share" role="tab">Invite friends</button>
+        <button class="tab" data-tab="deploy" role="tab">Host it 24/7</button>
+      </div>
+
+      <div class="panel active" data-panel="local">
+        <p>You'll need <a href="https://nodejs.org">Node.js 18+</a>.</p>
+        <div class="code"><button class="copy">Copy</button><pre><code>git clone https://github.com/Guinnessstache/high-roller-mahjong.git
+cd high-roller-mahjong
+npm install
+npm start</code></pre></div>
+        <p>Open <code>http://localhost:3000</code>, pick a name and click <strong>Play vs bots</strong>, or <strong>Create table</strong> and share the code.</p>
+      </div>
+
+      <div class="panel" data-panel="share">
+        <p>Browsers only allow the camera and mic on HTTPS pages, so give friends an HTTPS link with a free tunnel:</p>
+        <div class="code"><button class="copy">Copy</button><pre><code># Windows: winget install --id Cloudflare.cloudflared
+# macOS:   brew install cloudflared
+cloudflared tunnel --url http://localhost:3000</code></pre></div>
+        <p>Open the <code>https://….trycloudflare.com</code> link it prints, create a table, and hit <strong>Copy invite</strong>.</p>
+      </div>
+
+      <div class="panel" data-panel="deploy">
+        <p>It's a single Node process with no database, so any host with WebSocket support works. The repo ships with a Render blueprint and a Dockerfile.</p>
+        <a class="btn btn-gold" href="https://render.com/deploy?repo=https://github.com/Guinnessstache/high-roller-mahjong">Deploy to Render</a>
+        <div class="code"><button class="copy">Copy</button><pre><code>docker build -t high-roller-mahjong .
+docker run -p 3000:3000 high-roller-mahjong</code></pre></div>
+        <p>Friends on strict mobile or office networks may need a TURN relay for video &mdash; set <code>TURN_URL</code>, <code>TURN_USERNAME</code> and <code>TURN_CREDENTIAL</code>.</p>
+      </div>
+    </section>
+
+    <!-- ================= FAQ ================= -->
+    <section class="section narrow" id="faq">
+      <p class="kicker">FAQ</p>
+      <h2>Questions at the table</h2>
+      <details>
+        <summary>Which mahjong is this?</summary>
+        <p>Hong Kong (Cantonese) rules with faan scoring: 144 tiles including flowers and seasons, a 3-faan minimum by default, and a 10-faan limit. The host can change the minimum, the limit, the game length, and turn flowers or Seven Pairs on or off.</p>
+      </details>
+      <details>
+        <summary>Is this gambling?</summary>
+        <p>No. Points only exist for the length of a game. There's no payment, cash-out, or account system.</p>
+      </details>
+      <details>
+        <summary>I've never played. Can I still join?</summary>
+        <p>Yes. The in-game guide explains the rules and every scoring pattern, ready hints show which discards leave you one tile from winning, and Easy bots are forgiving.</p>
+      </details>
+      <details>
+        <summary>The game runs at 10 fps on a good graphics card.</summary>
+        <p>Your browser is probably drawing 3D without the GPU. Turn on <em>"Use graphics acceleration when available"</em> in Chrome or Edge settings and restart the browser. The ⚙ menu in-game shows your fps and which GPU is being used.</p>
+      </details>
+      <details>
+        <summary>A friend can't see or hear anyone.</summary>
+        <p>Video is peer-to-peer. Most home networks connect fine with the built-in STUN servers; some mobile carriers and corporate networks need a TURN relay.</p>
+      </details>
+      <details>
+        <summary>Does it work on phones?</summary>
+        <p>Yes &mdash; the rack, claim buttons and camera adapt to small screens.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="brand"><span class="suit">中</span> High Roller Mahjong</div>
+    <p>MIT licensed · built by <a href="https://github.com/Guinnessstache">GuinnessStache</a> · play points only</p>
+  </footer>
+
+  <script type="module" src="js/site.js"></script>
+</body>
+</html>

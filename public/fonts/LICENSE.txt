@@ -1,0 +1,3 @@
+tiles-cjk.woff2 is a subset of Noto Serif CJK HK Bold (https://github.com/notofonts/noto-cjk),
+Copyright 2017-2022 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.
+Licensed under the SIL Open Font License, Version 1.1: https://openfontlicense.org

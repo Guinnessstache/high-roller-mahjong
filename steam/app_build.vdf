@@ -1,0 +1,11 @@
+"AppBuild"
+{
+	"AppID"	"480"
+	"Desc"	"High Roller Mahjong build"
+	"ContentRoot"	"..\dist\win-unpacked\"
+	"BuildOutput"	".\output\"
+	"Depots"
+	{
+		"481"	"depot_build_windows.vdf"
+	}
+}
