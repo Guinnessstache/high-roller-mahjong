@@ -513,3 +513,49 @@ body.pad.my-turn .pad-hints:not(:empty) { display: flex; }
 }
 .status-line .round-wind { font-family: "TileCJK", serif; color: #ffe9a8; background: #8a0d16; border-radius: 4px; padding: 0 4px; margin-right: 2px; }
 .status-line .wall-left { color: var(--gold); font-weight: 700; }
+
+/* ---------- table panel (everyone's discards + melds) ---------- */
+.table-panel { position: absolute; top: 60px; right: 14px; width: min(360px, calc(100vw - 28px)); max-height: calc(100vh - 360px); display: flex; flex-direction: column; background: rgba(12, 6, 4, .82); border: 1px solid var(--line); border-radius: 14px; backdrop-filter: blur(8px); box-shadow: 0 10px 30px rgba(0,0,0,.5); z-index: 3; overflow: hidden; }
+.tp-toggle { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 12px; background: none; border: 0; border-bottom: 1px solid var(--line); cursor: pointer; font-weight: 700; font-size: 13px; text-align: left; }
+.tp-title { color: var(--gold); letter-spacing: .06em; text-transform: uppercase; font-size: 12px; }
+.tp-count { color: var(--muted); font-weight: 500; flex: 1; }
+.tp-chev { transition: transform .2s; color: var(--muted); }
+.table-panel.collapsed .tp-chev { transform: rotate(-90deg); }
+.table-panel.collapsed .tp-toggle { border-bottom: 0; }
+.tp-body { overflow-y: auto; padding: 4px 8px 8px; --tw: 25px; }
+.tp-row { padding: 6px 4px; border-bottom: 1px solid rgba(232, 192, 96, .12); border-radius: 8px; }
+.tp-row:last-child { border-bottom: 0; }
+.tp-row.acting { background: rgba(232, 192, 96, .1); box-shadow: inset 3px 0 0 var(--gold); }
+.tp-row.mine { opacity: .9; }
+.tp-head { display: flex; align-items: center; gap: 6px; font-size: 12px; margin-bottom: 4px; }
+.tp-head b { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tp-wind { font-family: "TileCJK", serif; font-weight: 700; color: #ffe9a8; background: #5a1a12; border-radius: 4px; padding: 0 4px; }
+.tp-wind.dealer { background: #b3121f; box-shadow: 0 0 0 1px var(--gold); }
+.tp-rel { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+.tp-pts { margin-left: auto; color: var(--gold); font-weight: 700; }
+.tp-melds { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
+.tp-meld { display: flex; gap: 1px; padding: 2px; background: rgba(255,255,255,.06); border-radius: 5px; }
+.tp-disc { display: flex; flex-wrap: wrap; gap: 2px 2px; padding-bottom: 3px; }
+.tp-body .mj-tile { cursor: default; box-shadow: inset 0 0 0 calc(var(--tw) * 0.06) #f6f1e2, 0 calc(var(--tw) * 0.09) 0 var(--jade); }
+.tp-body .mj-tile.last { box-shadow: inset 0 0 0 calc(var(--tw) * 0.06) #fff6d0, 0 calc(var(--tw) * 0.09) 0 var(--jade), 0 0 0 2px var(--gold), 0 0 10px rgba(232, 192, 96, .8); transform: translateY(-2px); }
+.tp-body .mj-tile.match { box-shadow: inset 0 0 0 calc(var(--tw) * 0.06) #dff7e6, 0 calc(var(--tw) * 0.09) 0 var(--jade), 0 0 0 2px #5ee08a; }
+.tp-none { color: var(--muted); font-size: 11px; font-style: italic; }
+.my-hint .seen { color: #ffe9a8; font-weight: 600; }
+
+/* big look at each discard */
+.discard-callout { position: absolute; left: 50%; top: 34%; transform: translate(-50%, 8px) scale(.94); display: flex; align-items: center; gap: 12px; padding: 10px 16px 10px 10px; background: rgba(12, 6, 4, .86); border: 1px solid var(--gold-2); border-radius: 14px; font-size: 14px; line-height: 1.35; opacity: 0; pointer-events: none !important; transition: opacity .2s, transform .2s; box-shadow: 0 10px 30px rgba(0,0,0,.55); z-index: 4; }
+.discard-callout.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.discard-callout .mj-tile { --tw: 52px; cursor: default; }
+.discard-callout b { color: var(--gold); }
+
+@media (max-width: 1100px) {
+  .table-panel { top: 112px; max-height: calc(100vh - 420px); }
+}
+@media (max-width: 640px) {
+  .table-panel { top: 132px; left: 8px; right: 8px; width: auto; max-height: 32vh; }
+  .tp-body { --tw: clamp(18px, calc((100vw - 60px) / 14), 24px); padding: 2px 6px 6px; }
+  .tp-row { padding: 4px 2px; }
+  .discard-callout { top: 47%; }
+  .discard-callout .mj-tile { --tw: 44px; }
+  .bottom-right { top: auto; bottom: calc(var(--tw) * 1.33 + 150px); }
+}

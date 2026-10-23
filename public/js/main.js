@@ -431,9 +431,90 @@ function updateHUD() {
   renderHand();
   renderActions();
   renderResults();
+  renderTablePanel();
 }
 
 function escapeHtml(x) { return String(x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+// ---------- table panel: everyone's discards and melds, readable on any screen ----------
+const SIDE = ['You', 'Right', 'Across', 'Left']; // relative to your seat
+app.panelOpen = local.get('mj_panel') !== '0';
+app.callout = local.get('mj_callout') !== '0';
+$('callout-toggle').checked = app.callout;
+$('callout-toggle').addEventListener('change', (e) => { app.callout = e.target.checked; local.set('mj_callout', e.target.checked ? '1' : '0'); });
+$('tp-toggle').addEventListener('click', () => {
+  app.panelOpen = !app.panelOpen;
+  local.set('mj_panel', app.panelOpen ? '1' : '0');
+  app.panelKey = '';
+  renderTablePanel();
+});
+
+// How many copies of a kind you can see: table discards and melds plus your own tiles.
+function visibleCount(k) {
+  const s = app.state;
+  let n = s.you.hand.filter((x) => x === k).length;
+  for (const p of s.table.seats) {
+    if (!p) continue;
+    n += p.discards.filter((x) => x === k).length;
+    for (const m of p.melds) if (!(m.concealed && m.type === 'kong' && p.id !== app.pid)) n += m.tiles.filter((x) => x === k).length;
+  }
+  return Math.min(4, n);
+}
+
+function renderTablePanel() {
+  const s = app.state;
+  const t = s?.table;
+  const panel = $('table-panel');
+  const live = t && t.wallTotal && (t.phase === 'turn' || t.phase === 'claim' || t.phase === 'robkong' || t.phase === 'over');
+  panel.classList.toggle('hidden', !live);
+  if (!live) { app.panelKey = ''; return; }
+  const focus = app.sel;
+  const ld = t.lastDiscard;
+  const key = JSON.stringify([app.panelOpen, focus, ld, t.seats.map((p) => p && [p.name, p.wind, p.discards, p.melds.map((m) => m.tiles), p.points])]);
+  if (key === app.panelKey) return;
+  app.panelKey = key;
+  panel.classList.toggle('collapsed', !app.panelOpen);
+  $('tp-toggle').setAttribute('aria-expanded', String(app.panelOpen));
+  const total = t.seats.reduce((a, p) => a + (p ? p.discards.length : 0), 0);
+  $('tp-count').textContent = `${total} discards`;
+  if (!app.panelOpen) { $('tp-body').innerHTML = ''; return; }
+  const me = s.you.seat >= 0 ? s.you.seat : 0;
+  const order = [3, 2, 1, 0].map((d) => (me + d) % 4); // left, across, right, you
+  const mark = (k) => (focus !== null && k === focus ? ' match' : '');
+  $('tp-body').innerHTML = order.map((seat) => {
+    const p = t.seats[seat];
+    if (!p) return '';
+    const rel = SIDE[(seat - me + 4) % 4];
+    const turn = t.toAct === seat ? ' acting' : '';
+    const melds = p.melds.map((m) => `<span class="tp-meld">${m.tiles.map((k, i) => {
+      const hidden = m.concealed && (i === 0 || i === 3);
+      return tileEl(hidden ? -1 : k, (hidden ? 'back' : '') + mark(k));
+    }).join('')}</span>`).join('');
+    const disc = p.discards.map((k, i) => {
+      const last = ld && ld.seat === seat && i === p.discards.length - 1;
+      return tileEl(k, `${last ? 'last' : ''}${mark(k)}`);
+    }).join('');
+    return `<div class="tp-row${turn}${seat === s.you.seat ? ' mine' : ''}">
+      <div class="tp-head"><span class="tp-wind${p.wind === 0 ? ' dealer' : ''}">${WIND_CHAR[p.wind]}</span><b>${escapeHtml(seat === s.you.seat ? 'You' : p.name)}</b><span class="tp-rel">${seat === s.you.seat ? '' : rel}</span><span class="tp-pts">${fmt(p.points)}</span></div>
+      ${melds ? `<div class="tp-melds">${melds}</div>` : ''}
+      <div class="tp-disc">${disc || '<span class="tp-none">no discards yet</span>'}</div>
+    </div>`;
+  }).join('');
+}
+
+// A big, brief look at each discard as it lands.
+let calloutTimer;
+function showDiscardCallout(e) {
+  if (!app.callout || !app.state) return;
+  const p = app.state.table.seats[e.seat];
+  const el = $('discard-callout');
+  const mine = e.seat === app.state.you.seat;
+  el.innerHTML = `${tileEl(e.tile)}<span><b>${escapeHtml(mine ? 'You' : p?.name || '')}</b> discarded<br>${tileName(e.tile)}</span>`;
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  clearTimeout(calloutTimer);
+  calloutTimer = setTimeout(() => el.classList.remove('show'), 1900);
+}
+view.onDiscard = showDiscardCallout;
 
 // ---------- your tiles ----------
 function myTiles() {
@@ -459,7 +540,7 @@ function renderHand() {
   const canDiscard = legal?.type === 'turn';
   const { hand, drawn } = myTiles();
   const melds = me.melds;
-  const key = JSON.stringify([hand, drawn, melds.map((m) => m.tiles), me.bonus, canDiscard, app.sel, app.hints, t.phase]);
+  const key = JSON.stringify([hand, drawn, melds.map((m) => m.tiles), me.bonus, canDiscard, app.sel, app.hints, t.phase, app.sel !== null ? visibleCount(app.sel) : 0]);
   if (key === app.handKey) return;
   const fresh = !app.handKey;
   app.handKey = key;
@@ -506,6 +587,10 @@ function renderHand() {
       hint = sh === 1 ? '1 tile from ready' : '';
     }
   } else if (canDiscard) hint = '<span class="discard-hint">Tap a tile to discard</span>';
+  if (app.sel !== null) {
+    const seen = visibleCount(app.sel);
+    hint = `${tileEl(app.sel)} <span class="seen">${seen} of 4 visible \u00b7 ${4 - seen} unseen</span>${canDiscard ? ' <span class="discard-hint">tap again to discard</span>' : ''}`;
+  }
   $('my-hint').innerHTML = hint;
 }
 

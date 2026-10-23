@@ -155,6 +155,7 @@
         <label class="chk"><input type="checkbox" id="corners-toggle" checked /> Numbers on tile corners</label>
         <label class="chk"><input type="checkbox" id="hints-toggle" checked /> Ready hints (what you&rsquo;re waiting on)</label>
         <label class="chk"><input type="checkbox" id="quick-toggle" /> One-tap discard</label>
+        <label class="chk"><input type="checkbox" id="callout-toggle" checked /> Show each discard up close</label>
         <button id="help-btn" class="btn small ghost">How to play &amp; scoring</button>
         <label class="chk"><input type="checkbox" id="tiles-toggle" /> Show video tiles</label>
         <button id="devices-btn" class="btn small ghost">Camera &amp; mic…</button>
@@ -201,6 +202,12 @@
     </div>
 
     <div id="table-info" class="table-info hidden"></div>
+
+    <div id="table-panel" class="table-panel hidden" aria-label="Discards and melds">
+      <button type="button" id="tp-toggle" class="tp-toggle" aria-expanded="true"><span class="tp-title">Table</span><span id="tp-count" class="tp-count"></span><span class="tp-chev">▾</span></button>
+      <div id="tp-body" class="tp-body"></div>
+    </div>
+    <div id="discard-callout" class="discard-callout" aria-live="polite"></div>
 
     <div id="results" class="results hidden" aria-live="polite">
       <div class="r-title"></div>
