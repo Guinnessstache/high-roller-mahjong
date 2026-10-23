@@ -441,6 +441,13 @@ const SIDE = ['You', 'Right', 'Across', 'Left']; // relative to your seat
 app.panelOpen = local.get('mj_panel') !== '0';
 app.callout = local.get('mj_callout') !== '0';
 $('callout-toggle').checked = app.callout;
+world.mouseLook = local.get('mj_mouselook') === '1';
+$('mouselook-toggle').checked = world.mouseLook;
+$('mouselook-toggle').addEventListener('change', (e) => {
+  world.mouseLook = e.target.checked;
+  local.set('mj_mouselook', e.target.checked ? '1' : '0');
+  if (!e.target.checked) world.mouse.set(0, 0);
+});
 $('callout-toggle').addEventListener('change', (e) => { app.callout = e.target.checked; local.set('mj_callout', e.target.checked ? '1' : '0'); });
 $('tp-toggle').addEventListener('click', () => {
   app.panelOpen = !app.panelOpen;
