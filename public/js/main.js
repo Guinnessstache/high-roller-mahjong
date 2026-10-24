@@ -1121,6 +1121,16 @@ function resetMediaUI() {
   $('self-wrap').classList.add('hidden');
 }
 
+// Phones: the video tiles stack in the camera column instead of floating over the top bar.
+const phoneLayout = matchMedia('(max-width: 640px)');
+function placeVideoTiles() {
+  const tiles = $('tiles');
+  const home = phoneLayout.matches ? document.querySelector('.media-panel') : $('hud');
+  if (home && tiles.parentElement !== home) home.prepend(tiles);
+}
+phoneLayout.addEventListener?.('change', placeVideoTiles);
+placeVideoTiles();
+
 function renderTiles() {
   const box = $('tiles');
   if (box.classList.contains('hidden') || !app.room) { box.innerHTML = ''; return; }

@@ -573,3 +573,11 @@ body.pad.my-turn .pad-hints:not(:empty) { display: flex; }
   .menu .chk { padding: 3px 0; }
   .menu .chk input { width: 20px; height: 20px; }
 }
+
+/* Phones: video tiles in one scrolling row just above your own camera (moved there by
+   main.js), so they stay clear of the table panel at the top. */
+@media (max-width: 640px) {
+  .media-panel .tiles { position: static; display: flex; flex-direction: row-reverse; gap: 6px; max-width: calc(100vw - 20px); overflow-x: auto; overscroll-behavior: contain; }
+  .media-panel .tiles .tile { width: 80px; flex: none; }
+  .media-panel .tiles .tile span { font-size: 10px; left: 4px; bottom: 2px; }
+}
